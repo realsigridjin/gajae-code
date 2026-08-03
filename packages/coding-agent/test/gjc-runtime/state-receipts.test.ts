@@ -4,7 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { auditPath, modeStatePath } from "@gajae-code/coding-agent/gjc-runtime/session-layout";
 import { runNativeStateCommand } from "../../src/gjc-runtime/state-runtime";
-import { ensureWorkflowSkillActivationState } from "../../src/hooks/skill-state";
+import { syncSkillActiveState } from "../../src/skill-state/active-state";
 import { initialPhaseForSkill } from "../../src/skill-state/initial-phase";
 import { buildWorkflowStateReceipt } from "../../src/skill-state/workflow-state-contract";
 
@@ -169,12 +169,13 @@ describe("workflow receipt path contract", () => {
 	it("uses session-layout receipt paths after an opt-in workflow activation is resolved", async () => {
 		await withTempCwd(async cwd => {
 			const sessionId = "receipt-session-opt-in.id";
-			const seeded = await ensureWorkflowSkillActivationState({
+			await syncSkillActiveState({
 				cwd,
 				skill: "ultratest",
 				sessionId,
+				active: true,
+				phase: initialPhaseForSkill("ultratest"),
 			});
-			expect(seeded).toMatchObject({ active: true, skill: "ultratest" });
 
 			const result = await runNativeStateCommand(
 				[
